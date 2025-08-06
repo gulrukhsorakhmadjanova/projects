@@ -67,7 +67,7 @@ export function loadProducts(fun){
   xhr.send();
 }
 
-// loadProducts(); // Commented out to prevent automatic loading without callback
+ loadProducts(); 
 
 
 
