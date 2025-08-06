@@ -1,12 +1,18 @@
 import { renderOrderSummary } from "../../scripts/checkout/orderSummary.js";
 import { loadFromStorage, cart} from '../../data/cart.js';
+import { loadProducts, products } from "../../data/products.js";
 
 
 describe('test suite: renderOrderSummary', () =>
 {
   const productId1 = 'e43638ce-6aa0-4b85-b27f-e1d07eb678c6';
   const productId2 = '15b6fc6f-327a-4ec4-896f-486349e85a3d';
-  beforeEach( () => {
+  beforeAll( (done) => {
+    loadProducts( () => {
+      done();
+    });
+  }, 10000) // Add timeout to prevent test from hanging
+  beforeEach( (done) => {
     
     spyOn(localStorage, 'setItem');
     document.querySelector('.js-test-container').innerHTML =
@@ -30,7 +36,21 @@ describe('test suite: renderOrderSummary', () =>
     });
     
     loadFromStorage();
-    renderOrderSummary();
+    
+    // Wait for products to be loaded before rendering
+    const checkProductsLoaded = () => {
+      if (products.length > 0) {
+        renderOrderSummary();
+        done();
+      } else {
+        setTimeout(checkProductsLoaded, 100);
+      }
+    };
+    checkProductsLoaded();
+  });
+  
+  afterEach(() => {
+    document.querySelector('.js-test-container').innerHTML = '';
   });
   it('displays the cart', () =>{
    expect(
@@ -41,7 +61,6 @@ describe('test suite: renderOrderSummary', () =>
   expect(document.querySelector(`.js-product-quantity-${productId2}`).innerText
 ).toContain('Quantity: 1');
 
-document.querySelector('.js-test-container').innerHTML = '';
   });
 
   it('removes a product', () =>{
@@ -61,7 +80,6 @@ document.querySelector('.js-test-container').innerHTML = '';
 
     expect(cart.length).toEqual(1);
     expect(cart[0].productId).toEqual(productId2);
-    document.querySelector('.js-test-container').innerHTML = '';
 
   });
 });

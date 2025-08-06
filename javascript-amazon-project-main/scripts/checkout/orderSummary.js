@@ -7,9 +7,6 @@ import { renderPaymentSummary } from './paymentSummary.js';
 
 
 export function renderOrderSummary() {
-
-
-
   let cartSummaryHTML = '';
 
   cart.forEach(
@@ -24,8 +21,12 @@ export function renderOrderSummary() {
       
       const deliveryOptionId = cartItem.deliveryOptionId;
 
-      const deliveryOption = getDeliveryOption(deliveryOptionId
-      );
+      const deliveryOption = getDeliveryOption(deliveryOptionId);
+      
+      if (!deliveryOption) {
+        return;
+      }
+      
       const today = dayjs();
       const deliveryDate = today.add(
         deliveryOption.deliveryDays, 'days'
@@ -91,13 +92,13 @@ export function renderOrderSummary() {
           deliveryOption.deliveryDays, 'days'
         );
         const dateString = deliveryDate.format('dddd , MMMM D');
-        const priceString = deliveryOption.priceCents === 0 ?  'FREE' : ` $${formatCurrency(deliveryOption.priceCents)} - `;
+        const priceString = deliveryOption.priceCents === 0 ? 'FREE' : `$${formatCurrency(deliveryOption.priceCents)}`;
 
         const isChecked = deliveryOption.id === cartItem.deliveryOptionId;
 
         html +=
         `
-        <div class="delivery-option js-delivery-option "data-product-id = "${matchingProduct.id}" data-delivery-option-id = "${deliveryOption.id}">
+        <div class="delivery-option js-delivery-option" data-product-id="${matchingProduct.id}" data-delivery-option-id="${deliveryOption.id}">
                     <input type="radio"
                     ${isChecked ? 'checked' : ''}  
                       class="delivery-option-input"
@@ -131,7 +132,9 @@ export function renderOrderSummary() {
           const container = document.querySelector(
             `.js-cart-item-container-${productId}`
           );
-          container.remove();
+          if (container) {
+            container.remove();
+          }
           renderPaymentSummary();
         });
       });
@@ -148,9 +151,6 @@ export function renderOrderSummary() {
     
 
 }
-
-// Initial render
-renderOrderSummary();
 
 // Set up a function to check if products are loaded and re-render
 const checkProductsLoaded = () => {

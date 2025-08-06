@@ -1,11 +1,11 @@
-export let cart;
+export let cart = [];
 
-loadFromStorage();
+// loadFromStorage(); // Commented out to prevent automatic loading
 
 export function loadFromStorage() {
-   cart = JSON.parse(localStorage.getItem('cart'));
+   const cartFromStorage = JSON.parse(localStorage.getItem('cart'));
 
-if (!cart) {
+if (!cartFromStorage) {
 cart = [
   {
     productId: 'e43638ce-6aa0-4b85-b27f-e1d07eb678c6',
@@ -17,9 +17,10 @@ cart = [
     quantity: 1,
     deliveryOptionId: '2'
   }
-]
+];
+} else {
+  cart = cartFromStorage;
 }
-
 }
 
 
