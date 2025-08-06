@@ -1,5 +1,5 @@
 import {cart} from "../../data/cart.js";
-import { getProduct } from "../../data/products.js";
+import { getProduct, products } from "../../data/products.js";
 import { getDeliveryOption } from "../../data/deliveryOptions.js";
 import { formatCurrency } from "../utils/money.js";
 
@@ -9,6 +9,12 @@ export function renderPaymentSummary (){
 
   cart.forEach( (cartItem) => {
     const product = getProduct(cartItem.productId);
+    
+    // Skip this item if the product is not found (products might not be loaded yet)
+    if (!product) {
+      return;
+    }
+    
     productPriceCents += product.priceCents *cartItem.quantity;
     const deliveryOption= getDeliveryOption(cartItem.deliveryOptionId);
     shippingPriceCents += deliveryOption.priceCents ;
@@ -62,3 +68,16 @@ export function renderPaymentSummary (){
 
 
 }
+
+// Set up a function to check if products are loaded and re-render
+const checkProductsLoaded = () => {
+  if (products.length > 0) {
+    renderPaymentSummary();
+  } else {
+    // Check again after a short delay
+    setTimeout(checkProductsLoaded, 100);
+  }
+};
+
+// Start checking for products to be loaded
+checkProductsLoaded();

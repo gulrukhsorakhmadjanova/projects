@@ -1,5 +1,5 @@
 import {cart, removeFromCart, updateDeliveryOption } from '../../data/cart.js';
-import { getProduct} from '../../data/products.js'
+import { getProduct, products} from '../../data/products.js'
 import { formatCurrency } from '../utils/money.js';
 import dayjs from 'https://unpkg.com/supersimpledev@8.5.0/dayjs/esm/index.js';
 import {deliveryOptions, getDeliveryOption} from '../../data/deliveryOptions.js';
@@ -17,6 +17,11 @@ export function renderOrderSummary() {
       const productId = cartItem.productId;
 
      const matchingProduct = getProduct(productId);
+      
+      if (!matchingProduct) {
+        return;
+      }
+      
       const deliveryOptionId = cartItem.deliveryOptionId;
 
       const deliveryOption = getDeliveryOption(deliveryOptionId
@@ -74,6 +79,12 @@ export function renderOrderSummary() {
 
     function deliveryOptionsHTML (matchingProduct, cartItem){
       let html = '';
+      
+      // Check if matchingProduct exists before proceeding
+      if (!matchingProduct) {
+        return html;
+      }
+      
       deliveryOptions.forEach((deliveryOption) => {
         const today = dayjs();
         const deliveryDate = today.add(
@@ -138,4 +149,18 @@ export function renderOrderSummary() {
 
 }
 
+// Initial render
 renderOrderSummary();
+
+// Set up a function to check if products are loaded and re-render
+const checkProductsLoaded = () => {
+  if (products.length > 0) {
+    renderOrderSummary();
+  } else {
+    // Check again after a short delay
+    setTimeout(checkProductsLoaded, 100);
+  }
+};
+
+// Start checking for products to be loaded
+checkProductsLoaded();
