@@ -52,41 +52,152 @@
     </div>
 
     <div class="main">
-      <div class="order-tracking">
+      <div class="order-tracking" id="order-tracking">
         <a class="back-to-orders-link link-primary" href="orders.html">
           View all orders
         </a>
 
-        <div class="delivery-date">
-          Arriving on Monday, June 13
+        <div class="delivery-date" id="delivery-date">
+          Loading...
         </div>
 
-        <div class="product-info">
-          Black and Gray Athletic Cotton Socks - 6 Pairs
+        <div class="product-info" id="product-name">
+          Loading...
         </div>
 
-        <div class="product-info">
-          Quantity: 1
+        <div class="product-info" id="product-quantity">
+          Loading...
         </div>
 
-        <img class="product-image" src="images/products/athletic-cotton-socks-6-pairs.jpg">
+        <img class="product-image" id="product-image" src="" alt="">
 
         <div class="progress-labels-container">
-          <div class="progress-label">
+          <div class="progress-label" id="preparing-label">
             Preparing
           </div>
-          <div class="progress-label current-status">
+          <div class="progress-label current-status" id="shipped-label">
             Shipped
           </div>
-          <div class="progress-label">
+          <div class="progress-label" id="delivered-label">
             Delivered
           </div>
         </div>
 
         <div class="progress-bar-container">
-          <div class="progress-bar"></div>
+          <div class="progress-bar" id="progress-bar"></div>
         </div>
       </div>
     </div>
+
+    <script type="module">
+      import { orders } from './data/orders.js';
+      import { products } from './data/products.js';
+
+      function getTrackingStatus(orderTime) {
+        const now = new Date();
+        const orderDate = new Date(orderTime);
+        const daysSinceOrder = (now - orderDate) / (1000 * 60 * 60 * 24);
+        
+        if (daysSinceOrder < 1) {
+          return { status: 'preparing', progress: 0.33 };
+        } else if (daysSinceOrder < 3) {
+          return { status: 'shipped', progress: 0.66 };
+        } else {
+          return { status: 'delivered', progress: 1 };
+        }
+      }
+
+      function updateProgressBar(status, progress) {
+        const progressBar = document.getElementById('progress-bar');
+        const preparingLabel = document.getElementById('preparing-label');
+        const shippedLabel = document.getElementById('shipped-label');
+        const deliveredLabel = document.getElementById('delivered-label');
+
+        // Reset all labels
+        preparingLabel.classList.remove('current-status');
+        shippedLabel.classList.remove('current-status');
+        deliveredLabel.classList.remove('current-status');
+
+        // Update progress bar
+        progressBar.style.width = `${progress * 100}%`;
+
+        // Update current status
+        if (status === 'preparing') {
+          preparingLabel.classList.add('current-status');
+        } else if (status === 'shipped') {
+          shippedLabel.classList.add('current-status');
+        } else if (status === 'delivered') {
+          deliveredLabel.classList.add('current-status');
+        }
+      }
+
+      function renderTracking() {
+        const url = new URL(window.location.href);
+        const orderId = url.searchParams.get('orderId');
+        const productId = url.searchParams.get('productId');
+
+        if (!orderId || !productId) {
+          document.getElementById('order-tracking').innerHTML = `
+            <div style="text-align: center; padding: 40px;">
+              <h3>Invalid tracking information</h3>
+              <p>Unable to find order details.</p>
+              <a href="orders.html" class="link-primary">View all orders</a>
+            </div>
+          `;
+          return;
+        }
+
+        const order = orders.find(o => o.orderId === orderId);
+        if (!order) {
+          document.getElementById('order-tracking').innerHTML = `
+            <div style="text-align: center; padding: 40px;">
+              <h3>Order not found</h3>
+              <p>The order you're looking for doesn't exist.</p>
+              <a href="orders.html" class="link-primary">View all orders</a>
+            </div>
+          `;
+          return;
+        }
+
+        const orderItem = order.orderItems.find(item => item.productId === productId);
+        if (!orderItem) {
+          document.getElementById('order-tracking').innerHTML = `
+            <div style="text-align: center; padding: 40px;">
+              <h3>Product not found</h3>
+              <p>The product you're looking for is not in this order.</p>
+              <a href="orders.html" class="link-primary">View all orders</a>
+            </div>
+          `;
+          return;
+        }
+
+        const product = products.find(p => p.id === productId);
+        if (!product) {
+          document.getElementById('order-tracking').innerHTML = `
+            <div style="text-align: center; padding: 40px;">
+              <h3>Product information not found</h3>
+              <p>Unable to load product details.</p>
+              <a href="orders.html" class="link-primary">View all orders</a>
+            </div>
+          `;
+          return;
+        }
+
+        // Update tracking information
+        document.getElementById('delivery-date').textContent = 
+          `Arriving ${orderItem.estimatedDeliveryTime}`;
+        document.getElementById('product-name').textContent = product.name;
+        document.getElementById('product-quantity').textContent = 
+          `Quantity: ${orderItem.quantity}`;
+        document.getElementById('product-image').src = product.image;
+        document.getElementById('product-image').alt = product.name;
+
+        // Update tracking status
+        const trackingStatus = getTrackingStatus(order.orderTime);
+        updateProgressBar(trackingStatus.status, trackingStatus.progress);
+      }
+
+      renderTracking();
+    </script>
   </body>
 </html>

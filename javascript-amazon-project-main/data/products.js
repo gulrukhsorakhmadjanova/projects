@@ -68,7 +68,7 @@ loadProductsFetch().then( () => {
   renderPaymentSummary();
 });
 */
- /*
+ 
 export function loadProducts(fun){
   const xhr = new XMLHttpRequest();
 
@@ -94,7 +94,7 @@ export function loadProducts(fun){
 
  loadProducts(); 
 
-*/
+
 
 
 

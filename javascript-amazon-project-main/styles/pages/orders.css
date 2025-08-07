@@ -155,10 +155,22 @@
   align-self: start;
 }
 
+.order-container {
+  margin-bottom: 50px;
+}
+
 .track-package-button {
   width: 100%;
   font-size: 15px;
   padding: 8px;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.buy-again-message {
+  margin-left: 15px;
 }
 
 @media (max-width: 800px) {
